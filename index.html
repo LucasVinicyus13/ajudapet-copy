@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <title>AjudaPet - Conectando corações aos animais.</title>
+    <meta name="description" content="O AjudaPet conecta animais que precisam de ajuda a pessoas dispostas a transformar suas vidas por meio da solidariedade, proteção e adoção responsável.">
+    <meta name="google-site-verification" content="7tizpzbZzu5bfR1pT-PPqqCm-g1LpqksHZTL6dhjGJA" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <a href="https://ajudapet-blush.vercel.app" id="app-logo" aria-label="Ir para a página inicial do AjudaPet" title="Ir para a página inicial do AjudaPet"><img src="assets/images/favicon.png" alt="" aria-hidden="true">Ajuda<span>Pet</span></a>
+            <nav id="auth-menu">
+                <a href="pages/login.html" class="btn-login">Entrar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <h2>Animais precisando de você</h2>
+            <p>Veja quem está por perto e mude uma vida hoje.</p>
+        </section>
+
+        <div class="feed-toolbar">
+            <button type="button" class="btn-filter" id="filter-toggle-button">Filtros</button>
+            <button type="button" class="btn-filter btn-understand" id="understand-open-button">Entenda</button>
+        </div>
+
+        <!-- Feed de Animais -->
+        <div id="pet-feed" class="pet-grid">
+            <div class="loading">Carregando animais...</div>
+        </div>
+        <div id="loading-more" class="loading hidden">Carregando mais animais...</div>
+        <div id="end-of-feed" class="loading hidden">Não há mais posts.</div>
+    </main>
+
+    <div id="filter-modal" class="filter-modal" aria-hidden="true">
+        <div class="filter-modal-card">
+            <div class="filter-modal-header">
+                <div>
+                    <p class="filter-modal-eyebrow">Filtrar por categoria</p>
+                    <h2 class="filter-modal-title">Categorias</h2>
+                </div>
+                <button type="button" class="filter-close" id="filter-close-button" aria-label="Fechar filtros">×</button>
+            </div>
+            <p class="filter-modal-copy">Selecione uma ou mais categorias para ver apenas os animais que combinam.</p>
+            <div id="filter-options-list" class="filter-options-list"></div>
+            <div class="filter-actions">
+                <button type="button" class="btn-filter-secondary" id="filter-clear-button">Limpar</button>
+                <button type="button" class="btn-filter-primary" id="filter-apply-button">Aplicar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="understand-modal" class="filter-modal understand-modal" aria-hidden="true">
+        <section class="filter-modal-card understand-modal-card" role="dialog" aria-modal="true" aria-labelledby="understand-title">
+            <div class="filter-modal-header">
+                <div>
+                    <p class="filter-modal-eyebrow">Ajuda rápida</p>
+                    <h2 class="filter-modal-title" id="understand-title">Entenda as categorias</h2>
+                </div>
+                <button type="button" class="filter-close" id="understand-close-button" aria-label="Fechar explicações">×</button>
+            </div>
+            <p class="filter-modal-copy" id="understand-copy">Use as categorias para identificar o tipo, porte e fase de vida do animal.</p>
+
+            <div class="understand-pages">
+                <section class="understand-page" id="understand-categories-page" aria-label="Explicação das categorias">
+                    <dl class="understand-list">
+                        <div><dt>Pequeno Porte</dt><dd>Animais de tamanho compacto, que geralmente pesam menos e ocupam menos espaço.</dd></div>
+                        <div><dt>Médio Porte</dt><dd>Animais de tamanho intermediário, entre os de pequeno e grande porte.</dd></div>
+                        <div><dt>Grande Porte</dt><dd>Animais maiores e mais robustos, que precisam de espaço e manejo adequados.</dd></div>
+                        <div><dt>Cachorros</dt><dd>Cães de qualquer porte, idade ou raça.</dd></div>
+                        <div><dt>Gatos</dt><dd>Gatos domésticos de qualquer idade ou característica.</dd></div>
+                        <div><dt>Pássaros</dt><dd>Aves que precisam de cuidados compatíveis com sua espécie e condição.</dd></div>
+                        <div><dt>Répteis &amp; Anfíbios</dt><dd>Animais como tartarugas, lagartos, serpentes, sapos e rãs.</dd></div>
+                        <div><dt>Roedores &amp; Pequenos Mamíferos</dt><dd>Como coelhos, hamsters, porquinhos-da-índia e outros pequenos mamíferos.</dd></div>
+                        <div><dt>Peixes &amp; Aquarismo</dt><dd>Peixes e outros animais mantidos em aquários, com necessidades próprias de água e ambiente.</dd></div>
+                        <div><dt>Animais de Fazenda / Grande Porte Rural</dt><dd>Animais criados em áreas rurais, como cavalos, bois, vacas, cabras e ovelhas.</dd></div>
+                        <div><dt>Exóticos / Silvestres</dt><dd>Espécies não domésticas ou incomuns. O manejo e o resgate devem respeitar a legislação e contar com orientação especializada.</dd></div>
+                        <div><dt>Mamíferos</dt><dd>Animais que, em geral, têm pelos e alimentam os filhotes com leite.</dd></div>
+                        <div><dt>Carnívoros</dt><dd>Animais da ordem dos carnívoros, como cães e gatos.</dd></div>
+                        <div><dt>Filhotes</dt><dd>Animais jovens que ainda estão em fase de crescimento e desenvolvimento.</dd></div>
+                        <div><dt>Adultos</dt><dd>Animais que já passaram da fase de filhote e chegaram à maturidade.</dd></div>
+                        <div><dt>Sênior / Idosos</dt><dd>Animais mais velhos, que podem precisar de atenção e cuidados adaptados à idade.</dd></div>
+                    </dl>
+                </section>
+
+                <section class="understand-page" id="understand-status-page" aria-label="Explicação dos status" hidden>
+                    <div class="understand-status-list">
+                        <article class="understand-status-item">
+                            <h3 class="understand-status-title">Status: Resgate</h3>
+                            <p>O animal precisa ser retirado de uma situação de risco e levado para um local seguro.</p>
+                        </article>
+                        <article class="understand-status-item">
+                            <h3 class="understand-status-title">Status: Urgente</h3>
+                            <p>O animal precisa de ajuda prioritária, como atendimento, abrigo ou cuidados imediatos.</p>
+                        </article>
+                        <article class="understand-status-item">
+                            <h3 class="understand-status-title">Status: Adotado</h3>
+                            <p>O animal já encontrou um lar e não está mais disponível para adoção. A publicação será excluída 7 dias após ser marcada como adotada.</p>
+                        </article>
+                    </div>
+                </section>
+            </div>
+
+            <div class="understand-navigation">
+                <span class="understand-page-count" id="understand-page-count" aria-live="polite">1 de 2</span>
+                <button type="button" class="understand-arrow" id="understand-previous-button" aria-label="Voltar para categorias" title="Voltar para categorias" hidden>←</button>
+                <button type="button" class="understand-arrow" id="understand-next-button" aria-label="Avançar para status" title="Avançar para status">→</button>
+            </div>
+        </section>
+    </div>
+
+    <div id="pet-modal" class="pet-modal" aria-hidden="true">
+        <div class="pet-modal-card">
+            <div class="modal-image-wrapper">
+                <img id="modal-image" class="modal-image" src="" alt="Foto do animal">
+                <div class="modal-header-row">
+                    <span id="modal-status" class="pet-status status-urgente detail-status">urgente</span>
+                    <button class="modal-close" id="modal-close" aria-label="Fechar">×</button>
+                </div>
+            </div>
+            <div class="modal-content">
+                <a class="pet-author pet-author-link" data-modal-author-link href="#" aria-label="Ver perfil do usuário">
+                    <img class="pet-author-avatar" data-modal-author-avatar src="./assets/images/usuario.png" alt="Foto do usuário" loading="lazy">
+                    <span class="pet-author-name" data-modal-author-name>Usuário</span>
+                </a>
+                <div class="modal-heading-row">
+                    <h2 id="modal-name" class="pet-name">Nome do animal</h2>
+                    <div class="modal-action-row">
+                        <div class="modal-like-wrap">
+                            <button type="button" class="modal-like-btn" id="modal-like-btn" aria-label="Curtir post" aria-pressed="false" title="Curtir post">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M12 21.35 10.55 20C5.4 15.36 2 12.28 2 8.5A4.5 4.5 0 0 1 6.5 4c1.74 0 3.41.81 4.5 2.09A6.12 6.12 0 0 1 15.5 4 4.5 4.5 0 0 1 20 8.5c0 3.78-3.4 6.86-8.55 11.5L12 21.35Z"/>
+                                </svg>
+                            </button>
+                            <span class="modal-like-count" id="modal-like-count">0</span>
+                        </div>
+                        <button type="button" class="modal-share-btn" id="modal-share-btn" aria-label="Compartilhar post" title="Compartilhar">
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M18 16a2.5 2.5 0 0 0-1.9 1l-7.4-4.2a3.1 3.1 0 0 0 0-1.6L16.1 7a2.5 2.5 0 1 0-.9-1.8L7.8 9.4a3 3 0 1 0 0 5.2l7.4 4.2A2.5 2.5 0 1 0 18 16Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <p id="modal-city" class="pet-city">Cidade</p>
+                <p id="modal-category" class="pet-category">Categoria</p>
+                <h3 class="detail-desc-title">História</h3>
+                <p id="modal-desc" class="detail-desc">Descrição do animal.</p>
+                <button class="btn-ajudar" id="modal-help-btn">FALAR COM RESPONSÁVEL</button>
+                <button class="btn-report btn-report-modal" id="modal-report-btn" type="button">Denunciar post</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="report-modal" class="report-modal" aria-hidden="true">
+        <div class="report-modal-card">
+            <div class="report-modal-header">
+                <div>
+                    <p class="filter-modal-eyebrow">Denúncia</p>
+                    <h2 class="filter-modal-title">Denunciar post</h2>
+                </div>
+                <button type="button" class="filter-close" id="report-close-button" aria-label="Fechar denúncia">×</button>
+            </div>
+            <p class="report-copy">Você está denunciando o post de <strong id="report-pet-name">este animal</strong>.</p>
+            <form id="report-form" class="report-form">
+                <label class="report-option"><input type="radio" name="report-reason" value="Pornografia"> Pornografia</label>
+                <label class="report-option"><input type="radio" name="report-reason" value="Palavrões"> Palavrões</label>
+                <label class="report-option"><input type="radio" name="report-reason" value="Não é um animal"> Não é um animal</label>
+                <label class="report-option"><input type="radio" name="report-reason" value="Outro"> Outro</label>
+                <label class="report-field report-field-hidden">
+                    <span>Descreva o motivo</span>
+                    <textarea id="report-other-reason" maxlength="150" rows="3" placeholder="Máximo de 150 caracteres"></textarea>
+                </label>
+                <div class="filter-actions">
+                    <button type="button" class="btn-filter-secondary" id="report-cancel-button">Cancelar</button>
+                    <button type="submit" class="btn-filter-primary">Enviar denúncia</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="add-pet-modal" class="add-pet-modal" aria-hidden="true">
+        <div class="add-pet-card">
+            <div class="add-pet-header">
+                <h2>Publicar animal</h2>
+            </div>
+            <form id="add-pet-form" class="add-pet-form">
+                <label class="form-field">
+                    <span>Fotos do animal</span>
+                    <input id="addpet-image" type="file" accept="image/*">
+                </label>
+                <div id="addpet-image-preview" class="pet-image-upload-preview" hidden>
+                    <img id="addpet-image-preview-img" alt="Prévia da foto recortada do animal">
+                    <span>Prévia da foto</span>
+                </div>
+                <label class="form-field">
+                    <span>Nome</span>
+                    <input id="addpet-name" type="text" placeholder="Nome do animal" required>
+                </label>
+                <div class="unknown-info-option">
+                    <input id="addpet-name-unknown" type="checkbox">
+                    <label for="addpet-name-unknown">Não sei informar.</label>
+                </div>
+                <label class="form-field">
+                    <span>Data de nascimento</span>
+                    <input id="addpet-birthdate" type="date" max="9999-12-31" placeholder="Data de nascimento" required>
+                    <span id="addpet-birthdate-error" class="input-error" role="alert" hidden>A data de nascimento não pode ser posterior à data atual.</span>
+                </label>
+                <div class="unknown-info-option">
+                    <input id="addpet-birthdate-unknown" type="checkbox">
+                    <label for="addpet-birthdate-unknown">Não sei informar.</label>
+                </div>
+                <label class="form-field">
+                    <span>Estado</span>
+                    <select id="addpet-state" required>
+                        <option value="">Selecione um estado</option>
+                        <option value="AC">AC - Acre</option>
+                        <option value="AL">AL - Alagoas</option>
+                        <option value="AP">AP - Amapá</option>
+                        <option value="AM">AM - Amazonas</option>
+                        <option value="BA">BA - Bahia</option>
+                        <option value="CE">CE - Ceará</option>
+                        <option value="DF">DF - Distrito Federal</option>
+                        <option value="ES">ES - Espírito Santo</option>
+                        <option value="GO">GO - Goiás</option>
+                        <option value="MA">MA - Maranhão</option>
+                        <option value="MT">MT - Mato Grosso</option>
+                        <option value="MS">MS - Mato Grosso do Sul</option>
+                        <option value="MG">MG - Minas Gerais</option>
+                        <option value="PA">PA - Pará</option>
+                        <option value="PB">PB - Paraíba</option>
+                        <option value="PR">PR - Paraná</option>
+                        <option value="PE">PE - Pernambuco</option>
+                        <option value="PI">PI - Piauí</option>
+                        <option value="RJ">RJ - Rio de Janeiro</option>
+                        <option value="RN">RN - Rio Grande do Norte</option>
+                        <option value="RS">RS - Rio Grande do Sul</option>
+                        <option value="RO">RO - Rondônia</option>
+                        <option value="RR">RR - Roraima</option>
+                        <option value="SC">SC - Santa Catarina</option>
+                        <option value="SP">SP - São Paulo</option>
+                        <option value="SE">SE - Sergipe</option>
+                        <option value="TO">TO - Tocantins</option>
+                    </select>
+                </label>
+                <label class="form-field">
+                    <span>Cidade</span>
+                    <select id="addpet-city" required>
+                        <option value="">Selecione o estado primeiro</option>
+                    </select>
+                </label>
+                <label class="form-field">
+                    <span>Status</span>
+                    <select id="addpet-status" required>
+                        <option value="urgente">urgente</option>
+                        <option value="resgate">resgate</option>
+                        <option value="adotado">adotado</option>
+                    </select>
+                </label>
+                <label class="form-field">
+                    <span>Categoria</span>
+                    <div class="category-picker" id="category-picker">
+                        <div class="category-selected-list" id="category-selected-list" aria-live="polite">
+                            <span class="category-empty">Nenhuma categoria selecionada</span>
+                        </div>
+                        <div class="category-options-list" id="category-options-list"></div>
+                    </div>
+                    <select id="addpet-category" name="categorias" multiple hidden aria-hidden="true"></select>
+                </label>
+                <label class="form-field">
+                    <span>Contato</span>
+                    <input id="addpet-contact" type="tel" inputmode="tel" placeholder="(00) 00000-0000" required>
+                </label>
+                <label class="form-field">
+                    <span>Descrição do animal</span>
+                    <textarea id="addpet-desc" rows="4" placeholder="Conte a história do animal" required></textarea>
+                </label>
+                <button type="submit" class="btn-submit btn-submit-full">Publicar animal</button>
+                <button type="button" id="add-pet-cancel" class="btn-filter-secondary">Cancelar</button>
+            </form>
+        </div>
+    </div>
+    <div id="pet-image-crop-modal" class="pet-image-crop-modal" aria-hidden="true">
+        <section class="pet-image-crop-card" role="dialog" aria-modal="true" aria-labelledby="pet-image-crop-title">
+            <div class="pet-image-crop-header">
+                <div>
+                    <p class="filter-modal-eyebrow">Foto do animal</p>
+                    <h2 id="pet-image-crop-title" class="filter-modal-title">Ajustar enquadramento</h2>
+                </div>
+            </div>
+            <p class="pet-image-crop-copy">Arraste a foto para ajustar o enquadramento e use o zoom se precisar.</p>
+            <div id="pet-image-crop-viewport" class="pet-image-crop-viewport">
+                <img id="pet-image-crop-preview" alt="Prévia do recorte da foto do animal">
+            </div>
+            <div class="pet-image-crop-controls">
+                <label class="pet-image-crop-zoom-label" for="pet-image-crop-zoom">
+                    Zoom
+                    <output id="pet-image-crop-zoom-value" for="pet-image-crop-zoom">1,0×</output>
+                </label>
+                <button type="button" id="pet-image-crop-rotate" class="btn-filter-secondary" aria-label="Girar imagem 90 graus" title="Girar imagem 90 graus">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M4 14v-3a7 7 0 0 1 7-7h5"/>
+                        <path d="m12 1 4 3-4 3"/>
+                        <path d="M9 10h11v11H9z"/>
+                    </svg>
+                </button>
+            </div>
+            <input id="pet-image-crop-zoom" class="pet-image-crop-zoom" type="range" min="1" max="3" step="0.1" value="1">
+            <div class="pet-image-crop-actions">
+                <button type="button" id="pet-image-crop-cancel" class="btn-filter-secondary">Cancelar</button>
+                <button type="button" id="pet-image-crop-apply" class="btn-submit">Usar foto</button>
+            </div>
+        </section>
+    </div>
+
+    <footer class="app-footer">
+        <div class="container">
+            <p>&copy; 2026 AjudaPet. Feito com amor.</p>
+            <p class="legal-notice">Ao utilizar o AjudaPet, você está concordando com os nossos
+                <button type="button" class="legal-link" id="terms-open-button" aria-haspopup="dialog">TERMOS DE USO</button>
+                e
+                <button type="button" class="legal-link" id="privacy-open-button" aria-haspopup="dialog">POLÍTICAS DE PRIVACIDADE</button>.
+            </p>
+            <p class="feedback-notice">Encontrou algum erro ou tem um elogio para compartilhar? Deixe seu
+                <button type="button" class="legal-link" id="feedback-open-button" aria-haspopup="dialog">feedback</button>!
+            </p>
+            <p class="footer-credit"><strong>Desenvolvido por Lucas Vinicyus Sanches Anacleto.</strong></p>
+            <section class="sponsors" aria-labelledby="sponsors-title">
+                <h2 class="sponsors-title" id="sponsors-title">Patrocinadores:</h2>
+                <div class="sponsors-list">
+                    <div class="sponsor-item">
+                        <img src="assets/images/patrocinador-1.png" alt="Mimo Pet">
+                    </div>
+                    <div class="sponsor-item">
+                        <img src="assets/images/patrocinador-2.jpg" alt="Rancho Rural">
+                    </div>
+                    <div class="sponsor-item">
+                        <img src="assets/images/patrocinador-3.png" alt="Pet Mais Saúde">
+                    </div>
+                    <div class="sponsor-item">
+                        <img src="assets/images/patrocinador-4.jpg" alt="Supermercado Ribeiro">
+                    </div>
+                    <div class="sponsor-item">
+                        <img src="assets/images/patrocinador-5.jpeg" alt="Profit">
+                    </div>
+                    <div class="sponsor-item">
+                        <img src="assets/images/patrocinador-6.jpeg" alt="PetIt">
+                    </div>
+                    <div class="sponsor-item">
+                        <img src="assets/images/patrocinador-7.png" alt="Casa Agrícola">
+                    </div>
+                    <div class="sponsor-item">
+                        <img src="assets/images/patrocinador-8.png" alt="Casa Rural">
+                    </div>
+                    <div class="sponsor-item">
+                        <img src="assets/images/patrocinador-9.png" alt="Amor de Patas">
+                    </div>
+                    <!-- Para adicionar mais patrocinadores, copie um bloco .sponsor-item e atualize o número. -->
+                </div>
+            </section>
+        </div>
+    </footer>
+
+    <div id="feedback-modal" class="filter-modal feedback-modal" aria-hidden="true">
+        <section class="filter-modal-card feedback-modal-card" role="dialog" aria-modal="true" aria-labelledby="feedback-title">
+            <div class="filter-modal-header">
+                <div>
+                    <p class="filter-modal-eyebrow">AjudaPet</p>
+                    <h2 class="filter-modal-title" id="feedback-title">Compartilhe seu feedback</h2>
+                </div>
+                <button type="button" class="filter-close" data-feedback-close aria-label="Fechar feedback">×</button>
+            </div>
+            <form id="feedback-form" class="feedback-form">
+                <fieldset class="feedback-type-field">
+                    <legend>Tipo de feedback</legend>
+                    <label><input type="radio" name="feedback_type" value="Erro" required><span>Erro</span></label>
+                    <label><input type="radio" name="feedback_type" value="Elogio" required><span>Elogio</span></label>
+                    <label><input type="radio" name="feedback_type" value="Outro" required><span>Outro</span></label>
+                </fieldset>
+                <label class="feedback-field" for="feedback-message">
+                    <span>O que você gostaria de nos dizer?</span>
+                    <div class="feedback-message-wrap">
+                        <textarea id="feedback-message" name="feedback" rows="5" maxlength="150" required></textarea>
+                        <span id="feedback-character-count" class="feedback-character-count" aria-hidden="true">0/150</span>
+                    </div>
+                </label>
+                <p id="feedback-status" class="feedback-status" role="status" aria-live="polite"></p>
+                <button type="submit" class="btn-submit btn-submit-full" id="feedback-submit-button">Confirmar</button>
+            </form>
+        </section>
+    </div>
+
+    <div id="terms-modal" class="filter-modal legal-modal" aria-hidden="true">
+        <section class="filter-modal-card legal-modal-card" role="dialog" aria-modal="true" aria-labelledby="terms-title">
+            <div class="filter-modal-header">
+                <div>
+                    <p class="filter-modal-eyebrow">AjudaPet</p>
+                    <h2 class="filter-modal-title" id="terms-title">Termos de Uso</h2>
+                </div>
+                <button type="button" class="filter-close" data-legal-close aria-label="Fechar termos de uso">×</button>
+            </div>
+            <div class="legal-document" id="terms-document"></div>
+        </section>
+    </div>
+    <pre class="legal-source" id="terms-source" hidden># TERMOS DE USO — AJUDAPET
+
+**Última atualização: 05 de outubro de 2026**
+
+Bem-vindo ao **AjudaPet**, uma plataforma criada com o objetivo de facilitar a divulgação de animais em situação de rua, abandono, risco ou disponíveis para adoção, aproximando pessoas interessadas em ajudar e promovendo a adoção responsável.
+
+Ao acessar, navegar, criar uma conta ou utilizar qualquer funcionalidade do AjudaPet, você declara que leu e concorda com estes Termos de Uso. Caso não concorde com algum dos termos apresentados, recomendamos que não utilize a plataforma.
+
+## 1. Sobre o AjudaPet
+
+O AjudaPet é uma plataforma digital de divulgação e interação entre usuários interessados em ajudar animais.
+
+A plataforma permite, entre outras funcionalidades:
+
+* visualizar publicações de animais;
+* publicar animais que necessitam de ajuda ou estão disponíveis para adoção;
+* informar localização, características e situação do animal;
+* entrar em contato com responsáveis pelas publicações;
+* curtir e compartilhar publicações;
+* seguir outros usuários;
+* consultar perfis públicos;
+* denunciar publicações;
+* atualizar o status de animais publicados, inclusive indicando quando um animal foi adotado.
+
+O AjudaPet atua como uma ferramenta de divulgação e aproximação entre usuários. A plataforma **não realiza diretamente a adoção, o resgate, o transporte, o atendimento veterinário ou a entrega dos animais**.
+
+## 2. Cadastro e conta do usuário
+
+Algumas funcionalidades do AjudaPet dependem da criação de uma conta.
+
+Ao criar uma conta, o usuário se compromete a fornecer informações verdadeiras, completas e atualizadas, bem como a manter a segurança de suas credenciais de acesso.
+
+O usuário é responsável pelas atividades realizadas por meio de sua conta e deve comunicar ao AjudaPet qualquer utilização não autorizada de suas credenciais que venha ao seu conhecimento.
+
+Não é permitido criar contas utilizando a identidade de outra pessoa, informações falsas ou meios destinados a ocultar ou falsificar a identidade do usuário.
+
+## 3. Publicações de animais
+
+Os usuários podem publicar informações sobre animais que necessitem de ajuda, estejam disponíveis para adoção ou se encontrem em outras situações contempladas pela plataforma.
+
+O usuário que realizar uma publicação é responsável pelas informações fornecidas, incluindo:
+
+* fotografias;
+* nome ou identificação do animal;
+* espécie;
+* porte;
+* fase de vida;
+* localização;
+* situação ou categoria;
+* descrição;
+* informações de contato;
+* demais informações inseridas voluntariamente.
+
+O usuário deve garantir que possui autorização para publicar imagens, informações e dados de terceiros eventualmente inseridos na publicação.
+
+As informações divulgadas devem ser verdadeiras e não podem ter como objetivo enganar, prejudicar ou colocar outras pessoas ou animais em situação de risco.
+
+## 4. Responsabilidade pelas adoções e contatos
+
+O AjudaPet apenas facilita a aproximação entre pessoas.
+
+A decisão de realizar uma adoção, resgate, entrega, transporte, doação ou qualquer outro tipo de interação relacionada ao animal é de responsabilidade exclusiva das pessoas envolvidas.
+
+O AjudaPet não garante:
+
+* a veracidade de todas as informações fornecidas pelos usuários;
+* a existência ou localização efetiva de determinado animal;
+* a condição de saúde ou comportamento do animal;
+* a idoneidade dos responsáveis pelas publicações;
+* a realização ou conclusão de uma adoção;
+* o resultado de contatos realizados entre usuários.
+
+Recomendamos que os usuários adotem medidas de segurança antes de realizar encontros, transferências, pagamentos, entregas ou qualquer outra ação decorrente de uma publicação.
+
+## 5. Uso responsável da plataforma
+
+O usuário se compromete a utilizar o AjudaPet de maneira ética, legal e responsável.
+
+É proibido utilizar a plataforma para:
+
+* publicar informações falsas ou enganosas;
+* realizar golpes ou fraudes;
+* praticar assédio, ameaça ou discriminação;
+* publicar conteúdo ilegal;
+* utilizar a plataforma para fins comerciais não autorizados;
+* divulgar dados pessoais de terceiros sem autorização ou base legal adequada;
+* publicar conteúdo que coloque pessoas ou animais em risco;
+* utilizar a plataforma para atividades que violem a legislação brasileira;
+* criar contas falsas ou se passar por outra pessoa;
+* utilizar mecanismos automatizados para prejudicar o funcionamento da plataforma;
+* tentar obter acesso não autorizado a contas, dados ou sistemas;
+* publicar conteúdo ofensivo, abusivo ou incompatível com a finalidade do AjudaPet.
+
+## 6. Imagens e conteúdo publicado
+
+Ao publicar uma imagem, texto ou outra informação no AjudaPet, o usuário declara possuir os direitos ou as autorizações necessárias para realizar essa publicação.
+
+O usuário permanece responsável pelo conteúdo que publica.
+
+O AjudaPet poderá remover, ocultar ou restringir conteúdos que violem estes Termos de Uso, a legislação aplicável ou a finalidade da plataforma.
+
+Sempre que possível, denúncias de conteúdo inadequado poderão ser realizadas por meio dos mecanismos disponibilizados na própria plataforma.
+
+## 7. Denúncias
+
+O AjudaPet disponibiliza mecanismos para que usuários possam denunciar publicações que considerem inadequadas, falsas, abusivas, fraudulentas ou incompatíveis com a finalidade da plataforma.
+
+As denúncias poderão ser analisadas para verificar eventual violação destes Termos de Uso.
+
+O envio de uma denúncia não garante automaticamente a remoção de uma publicação. A medida adotada dependerá da análise da situação e das informações disponíveis.
+
+## 8. Curtidas, seguidores e compartilhamentos
+
+O AjudaPet disponibiliza funcionalidades de interação social, incluindo curtidas, seguidores e compartilhamentos.
+
+Essas funcionalidades devem ser utilizadas de maneira legítima e não podem ser utilizadas para manipulação artificial, assédio, perseguição, fraude ou qualquer outra finalidade ilícita.
+
+## 9. Disponibilidade do serviço
+
+O AjudaPet busca manter a plataforma disponível e funcionando adequadamente, mas não garante que o serviço estará disponível de maneira contínua ou livre de erros.
+
+Podem ocorrer interrupções decorrentes de:
+
+* manutenção;
+* atualizações;
+* falhas técnicas;
+* problemas de conexão;
+* indisponibilidade de serviços de terceiros;
+* situações de força maior;
+* outros eventos fora do controle da plataforma.
+
+## 10. Serviços de terceiros
+
+O funcionamento do AjudaPet utiliza serviços de terceiros, incluindo serviços de autenticação, armazenamento e infraestrutura tecnológica.
+
+Entre eles estão serviços fornecidos pelo **Firebase/Google** e pela **Vercel**.
+
+Esses serviços possuem suas próprias políticas, termos e condições de uso.
+
+O usuário reconhece que determinadas funcionalidades podem depender da disponibilidade desses serviços externos.
+
+## 11. Suspensão ou encerramento de contas
+
+O AjudaPet poderá restringir, suspender ou encerrar contas e publicações que violem estes Termos de Uso ou a legislação aplicável.
+
+Sempre que adequado e possível, poderão ser consideradas a gravidade da violação, o impacto causado e as circunstâncias do caso.
+
+## 12. Propriedade intelectual
+
+A identidade visual, estrutura, código, elementos gráficos e demais componentes desenvolvidos especificamente para o AjudaPet são protegidos pela legislação aplicável, respeitados os direitos de terceiros.
+
+O usuário não recebe, pelo simples uso da plataforma, qualquer direito de propriedade sobre os elementos do AjudaPet.
+
+Conteúdos publicados pelos usuários permanecem sob responsabilidade de seus respectivos autores e titulares de direitos.
+
+## 13. Proteção de dados pessoais
+
+O tratamento de dados pessoais realizado pelo AjudaPet é explicado em sua **Política de Privacidade**.
+
+Ao utilizar a plataforma, o usuário declara estar ciente das práticas de tratamento de dados descritas naquele documento.
+
+O AjudaPet busca tratar dados pessoais de acordo com a legislação brasileira aplicável, especialmente a Lei nº 13.709/2018 — Lei Geral de Proteção de Dados Pessoais (LGPD).
+
+## 14. Alterações destes Termos
+
+Estes Termos de Uso poderão ser atualizados para refletir alterações na plataforma, nas funcionalidades disponibilizadas, na legislação ou nas práticas do AjudaPet.
+
+Quando houver alterações relevantes, a versão atualizada será disponibilizada na plataforma.
+
+A continuidade de utilização do AjudaPet após a publicação de alterações poderá representar a ciência dos novos termos, respeitados os direitos assegurados pela legislação aplicável.
+
+## 15. Legislação aplicável
+
+Estes Termos de Uso são regidos pela legislação brasileira.
+
+Eventuais questões relacionadas à utilização da plataforma deverão observar a legislação vigente e os direitos assegurados aos usuários.
+
+## 16. Contato
+
+Para dúvidas, sugestões, denúncias ou solicitações relacionadas ao funcionamento da plataforma, o usuário poderá utilizar os canais de contato disponibilizados pelo AjudaPet.
+
+Para solicitações relacionadas especificamente ao tratamento de dados pessoais, consulte também a Política de Privacidade.
+
+---
+
+**AjudaPet — Adotar é um ato de amor.**
+
+Este documento foi elaborado para apresentar de forma clara as regras de utilização da plataforma e não substitui orientação jurídica profissional.</pre>
+
+    <div id="privacy-modal" class="filter-modal legal-modal" aria-hidden="true">
+        <section class="filter-modal-card legal-modal-card" role="dialog" aria-modal="true" aria-labelledby="privacy-title">
+            <div class="filter-modal-header">
+                <div>
+                    <p class="filter-modal-eyebrow">AjudaPet</p>
+                    <h2 class="filter-modal-title" id="privacy-title">Política de Privacidade</h2>
+                </div>
+                <button type="button" class="filter-close" data-legal-close aria-label="Fechar política de privacidade">×</button>
+            </div>
+            <div class="legal-document" id="privacy-document"></div>
+        </section>
+    </div>
+    <pre class="legal-source" id="privacy-source" hidden># POLÍTICA DE PRIVACIDADE — AJUDAPET
+
+**Última atualização: 05 de outubro de 2026**
+
+O **AjudaPet** valoriza a privacidade de seus usuários e busca tratar os dados pessoais de forma responsável, transparente e compatível com a legislação brasileira.
+
+Esta Política de Privacidade explica quais informações podem ser coletadas, por que são utilizadas, como são armazenadas e quais são os direitos dos usuários em relação aos seus dados pessoais.
+
+Esta política deve ser lida em conjunto com os Termos de Uso do AjudaPet.
+
+## 1. Quem somos
+
+O AjudaPet é uma plataforma web desenvolvida com a finalidade de facilitar a divulgação de animais em situação de risco, abandono ou disponíveis para adoção, promovendo a aproximação entre pessoas interessadas em ajudar.
+
+Para fins da legislação de proteção de dados, especialmente a Lei Geral de Proteção de Dados Pessoais — LGPD, a identificação formal do controlador e seus canais de contato deverão ser informados nesta política de acordo com a organização responsável pelo tratamento dos dados.
+
+**Controlador:** Lucas Vinicyus Sanches Anacleto
+
+**E-mail para assuntos de privacidade:** ajudapet.contato@gmail.com
+
+**Encarregado pelo tratamento de dados pessoais:** Lucas Vinicyus Sanches Anacleto
+
+## 2. Quais dados podemos coletar
+
+Dependendo da forma como o usuário utiliza o AjudaPet, poderão ser tratados dados como:
+
+### Dados de cadastro
+
+* nome;
+* endereço de e-mail;
+* senha ou informações relacionadas à autenticação;
+* foto de perfil, quando fornecida;
+* identificadores técnicos associados à conta.
+
+### Dados do perfil
+
+* nome de usuário;
+* foto de perfil;
+* informações disponibilizadas pelo próprio usuário;
+* publicações realizadas;
+* seguidores e usuários seguidos;
+* interações realizadas na plataforma.
+
+### Dados das publicações
+
+Ao cadastrar um animal, o usuário poderá fornecer:
+
+* nome ou identificação do animal;
+* fotografia;
+* espécie;
+* porte;
+* fase de vida;
+* categoria;
+* situação do animal;
+* estado;
+* cidade ou localização informada;
+* descrição;
+* telefone ou outro meio de contato informado;
+* outras informações que o usuário decidir publicar.
+
+### Dados de utilização
+
+Também poderão ser tratados dados técnicos necessários ao funcionamento da plataforma, como informações relacionadas ao acesso, autenticação, funcionamento da aplicação, registros técnicos e identificadores fornecidos pelos serviços utilizados pelo sistema.
+
+## 3. Como os dados são coletados
+
+Os dados podem ser obtidos:
+
+* quando o usuário cria uma conta;
+* quando realiza login;
+* quando edita seu perfil;
+* quando publica um animal;
+* quando interage com outras publicações;
+* quando segue ou deixa de seguir usuários;
+* quando realiza uma denúncia;
+* quando utiliza funcionalidades da plataforma;
+* automaticamente, por meio de tecnologias necessárias ao funcionamento dos serviços utilizados.
+
+## 4. Para que utilizamos os dados
+
+Os dados pessoais podem ser utilizados para as seguintes finalidades:
+
+### Funcionamento da conta
+
+* criar e manter a conta do usuário;
+* realizar autenticação;
+* permitir o acesso às funcionalidades;
+* identificar o usuário dentro da plataforma;
+* permitir o gerenciamento do perfil.
+
+### Funcionamento das publicações
+
+* exibir publicações de animais;
+* identificar o responsável pela publicação;
+* permitir que interessados entrem em contato;
+* possibilitar filtros e pesquisas;
+* permitir atualizações de status;
+* permitir interações com as publicações.
+
+### Recursos sociais
+
+* permitir seguidores e seguindo;
+* registrar curtidas;
+* exibir contadores e interações;
+* permitir compartilhamentos;
+* manter o funcionamento dos perfis públicos.
+
+### Segurança e moderação
+
+* identificar atividades suspeitas;
+* analisar denúncias;
+* prevenir abusos;
+* proteger a plataforma e seus usuários;
+* investigar possíveis violações dos Termos de Uso.
+
+### Cumprimento de obrigações
+
+Os dados também poderão ser tratados quando necessário para cumprir obrigações legais ou regulatórias, exercer direitos em processos judiciais ou administrativos e atender solicitações de autoridades competentes.
+
+## 5. Bases legais
+
+O tratamento de dados pessoais será realizado conforme as hipóteses legais previstas na LGPD e de acordo com a finalidade específica de cada tratamento.
+
+Dependendo do caso, poderão ser utilizadas bases legais como:
+
+* execução de contrato ou procedimentos relacionados ao serviço solicitado pelo usuário;
+* cumprimento de obrigação legal ou regulatória;
+* exercício regular de direitos;
+* legítimo interesse, quando aplicável e respeitados os direitos e liberdades do titular;
+* consentimento, quando necessário.
+
+A utilização de uma base legal específica dependerá da natureza e da finalidade do tratamento realizado.
+
+## 6. Dados publicados pelo próprio usuário
+
+É importante destacar que algumas informações inseridas no AjudaPet são destinadas à divulgação pública.
+
+Por exemplo, uma publicação de animal poderá conter fotografia, cidade, características do animal, descrição e informações de contato fornecidas pelo responsável.
+
+Ao publicar essas informações, o usuário reconhece que elas poderão ser visualizadas por outros usuários e visitantes da plataforma.
+
+**Recomendamos que o usuário não publique informações pessoais excessivas ou desnecessárias em uma publicação.**
+
+O usuário também deve evitar publicar dados pessoais de terceiros sem autorização ou outra base legal adequada.
+
+## 7. Compartilhamento de dados
+
+O AjudaPet poderá utilizar serviços tecnológicos de terceiros necessários para disponibilizar a plataforma.
+
+Entre os serviços utilizados pelo projeto estão:
+
+* **Firebase Authentication**, para autenticação de usuários;
+* **Firebase Firestore**, para armazenamento de informações;
+* **Firebase Storage**, para armazenamento de arquivos e imagens;
+* **Vercel**, para hospedagem e infraestrutura da aplicação;
+* outros serviços que possam ser incorporados futuramente para funcionamento, segurança ou melhoria da plataforma.
+
+Esses fornecedores poderão realizar tratamento de dados de acordo com suas respectivas funções e condições aplicáveis.
+
+O AjudaPet não comercializa dados pessoais dos usuários.
+
+Dados poderão ser compartilhados quando necessário para:
+
+* funcionamento da plataforma;
+* prestação dos serviços tecnológicos utilizados;
+* cumprimento de obrigação legal;
+* atendimento de determinação de autoridade competente;
+* exercício regular de direitos;
+* proteção da segurança dos usuários e da plataforma.
+
+## 8. WhatsApp e contatos externos
+
+Quando o usuário disponibilizar um número de telefone para contato ou utilizar a funcionalidade de contato por WhatsApp, a comunicação poderá ocorrer diretamente por meio do serviço externo correspondente.
+
+A partir do momento em que o usuário deixa a plataforma e utiliza um serviço de terceiros, o tratamento dos dados também estará sujeito às políticas e condições desse terceiro.
+
+O AjudaPet não controla o tratamento realizado diretamente por serviços externos.
+
+## 9. Armazenamento e segurança
+
+Os dados utilizados pelo AjudaPet são armazenados utilizando serviços de infraestrutura tecnológica de terceiros, incluindo recursos do Firebase.
+
+Buscamos adotar medidas técnicas e organizacionais razoáveis para proteger os dados contra acessos não autorizados, perda, alteração, divulgação indevida ou destruição.
+
+Entretanto, nenhum sistema conectado à internet pode garantir segurança absoluta.
+
+O usuário também possui responsabilidade pela segurança de sua conta, devendo manter suas credenciais protegidas e não compartilhá-las com terceiros.
+
+## 10. Retenção dos dados
+
+Os dados pessoais serão mantidos pelo período necessário para cumprir as finalidades para as quais foram coletados.
+
+Alguns dados poderão permanecer armazenados por período adicional quando necessário para:
+
+* cumprimento de obrigações legais;
+* exercício regular de direitos;
+* prevenção de fraudes e abusos;
+* resolução de conflitos;
+* cumprimento de determinações de autoridades competentes.
+
+Quando não houver mais necessidade ou fundamento legal para a manutenção dos dados, eles poderão ser excluídos, anonimizados ou tratados conforme as hipóteses permitidas pela legislação.
+
+## 11. Direitos dos titulares
+
+Nos termos da LGPD, o usuário poderá exercer, conforme aplicável, direitos relacionados aos seus dados pessoais, incluindo:
+
+* confirmação da existência de tratamento;
+* acesso aos dados;
+* correção de dados incompletos, inexatos ou desatualizados;
+* informações sobre o tratamento;
+* informações sobre compartilhamento de dados;
+* anonimização, bloqueio ou eliminação de dados em determinadas situações;
+* portabilidade, quando aplicável;
+* eliminação de dados tratados com base no consentimento, ressalvadas as hipóteses legais de conservação;
+* revogação do consentimento;
+* oposição ao tratamento, quando cabível;
+* revisão de decisões tomadas unicamente com base em tratamento automatizado, quando aplicável.
+
+A ANPD reconhece esses direitos e orienta que os titulares possam exercê-los perante o controlador.
+
+## 12. Como solicitar seus direitos
+
+Para exercer seus direitos ou esclarecer dúvidas sobre o tratamento de dados pessoais, o usuário poderá entrar em contato por meio do canal:
+
+**E-mail:** ajudapet.contato@gmail.com
+
+Para proteger a segurança dos dados, poderemos solicitar informações necessárias para confirmar a identidade do solicitante antes de atender determinadas solicitações.
+
+As solicitações serão analisadas de acordo com a legislação aplicável.
+
+## 13. Cookies e tecnologias semelhantes
+
+O AjudaPet poderá utilizar cookies, armazenamento local ou tecnologias semelhantes quando necessários para funcionamento, autenticação, segurança, preferências ou melhoria da experiência do usuário.
+
+Quando forem utilizados cookies que dependam de consentimento, serão observadas as exigências legais aplicáveis.
+
+O usuário poderá controlar determinadas tecnologias por meio das configurações do próprio navegador, embora a desativação de recursos essenciais possa afetar o funcionamento da plataforma.
+
+## 14. Crianças e adolescentes
+
+O AjudaPet não tem como finalidade específica a coleta de dados de crianças.
+
+Caso seja identificado tratamento de dados de crianças ou adolescentes em situação que exija proteção especial, serão observadas as disposições da legislação aplicável e as medidas necessárias para proteção desses usuários.
+
+Recomendamos que menores de idade utilizem a plataforma com orientação e acompanhamento de seus responsáveis quando necessário.
+
+## 15. Transferências internacionais
+
+Alguns dos serviços tecnológicos utilizados pelo AjudaPet podem realizar armazenamento, processamento ou transferência de dados em infraestrutura localizada fora do Brasil.
+
+Quando aplicável, essas operações serão realizadas observando os requisitos estabelecidos pela legislação brasileira de proteção de dados.
+
+A legislação brasileira prevê regras específicas para transferências internacionais de dados pessoais e exige transparência sobre essas operações em determinadas situações.
+
+## 16. Dados de terceiros inseridos nas publicações
+
+O usuário é responsável por garantir que possui autorização ou outra base legal adequada para inserir dados pessoais de terceiros em publicações.
+
+O AjudaPet não recomenda a publicação de documentos, endereços residenciais, informações financeiras, dados de saúde ou outras informações pessoais desnecessárias.
+
+Caso uma publicação contenha dados pessoais indevidos, o titular poderá solicitar sua análise por meio dos canais disponibilizados.
+
+## 17. Alterações desta Política
+
+Esta Política de Privacidade poderá ser atualizada para refletir alterações na plataforma, nos serviços utilizados, na legislação ou nas práticas de tratamento de dados.
+
+A versão mais recente será disponibilizada nesta página.
+
+Quando houver alterações relevantes, poderão ser utilizados mecanismos adicionais de comunicação aos usuários, quando apropriado.
+
+## 18. Contato
+
+Para dúvidas, solicitações ou informações relacionadas à privacidade e proteção de dados pessoais:
+
+**Responsável:** Lucas Vinicyus Sanches Anacleto
+
+**E-mail:** ajudapet.contato@gmail.com
+
+**Canal de atendimento:** WhatsApp - (43) 99967-9836
+
+Caso o titular entenda que seus direitos não foram adequadamente atendidos, poderá também buscar os canais oficiais da Autoridade Nacional de Proteção de Dados (ANPD), observados os requisitos aplicáveis.
+
+---
+
+**AjudaPet — Adotar é um ato de amor.**
+
+Esta Política de Privacidade busca explicar de forma clara e transparente as práticas de tratamento de dados do AjudaPet, observando a legislação brasileira aplicável, especialmente a Lei nº 13.709/2018 (LGPD).</pre>
+
+    <!-- Firebase SDK (Modular) -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/app.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script src="js/legal-modals.js"></script>
+</body>
+</html>

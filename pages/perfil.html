@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../assets/images/favicon.png">
+    <title>Meu Perfil - AjudaPet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-light">
+    <header class="app-header">
+        <div class="container">
+            <a href="https://ajudapet-blush.vercel.app" id="app-logo" aria-label="Ir para a página inicial do AjudaPet" title="Ir para a página inicial do AjudaPet"><img src="../assets/images/favicon.png" alt="" aria-hidden="true">Ajuda<span>Pet</span></a>
+            <a href="../index.html" class="home-button" aria-label="Ir para a página inicial" title="Ir para a página inicial">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3 2.5 11h2.75v9h5.25v-5.5h3V20h5.25v-9h2.75L12 3Z"/></svg>
+            </a>
+            <nav id="auth-menu">
+                <a href="login.html" class="btn-login">Entrar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container profile-page">
+        <section class="profile-card">
+            <button type="button" class="profile-card-menu-button" id="profile-card-menu-button" aria-label="Abrir opções do perfil" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div id="profile-card-menu" class="profile-card-menu hidden" role="menu" aria-label="Menu do perfil">
+                <input id="profile-avatar-input" type="file" accept="image/*" hidden>
+                <button id="profile-avatar-button" type="button" class="profile-menu-action" role="menuitem">Alterar foto de perfil</button>
+                <button id="profile-avatar-remove-button" type="button" class="profile-menu-action" role="menuitem">Remover foto</button>
+                <button type="button" id="logout-button" class="profile-menu-action profile-menu-action--danger" role="menuitem">Sair da conta</button>
+            </div>
+
+            <img id="profile-avatar" class="profile-avatar-large" src="../assets/images/usuario.png" alt="Foto de perfil">
+            <h2 id="profile-name">Nome do usuário</h2>
+            <p id="profile-email">email@exemplo.com</p>
+
+            <div class="user-profile-stats" aria-label="Estatísticas do perfil">
+                <div class="user-profile-stat user-profile-stat--clickable" data-profile-stat="followers">
+                    <strong id="profile-followers-count">0</strong>
+                    <span>Seguidores</span>
+                </div>
+                <div class="user-profile-stat user-profile-stat--clickable" data-profile-stat="following">
+                    <strong id="profile-following-count">0</strong>
+                    <span>Seguindo</span>
+                </div>
+                <div class="user-profile-stat user-profile-stat--clickable" data-profile-stat="posts">
+                    <strong id="profile-posts-count">0</strong>
+                    <span>Posts</span>
+                </div>
+            </div>
+
+            <div id="followers-modal" class="followers-modal hidden" aria-hidden="true">
+                <div class="followers-modal-backdrop" data-close-followers-modal></div>
+                <div class="followers-modal-card" role="dialog" aria-modal="true" aria-labelledby="followers-modal-title">
+                    <div class="followers-modal-header">
+                        <h3 id="followers-modal-title">Seguidores</h3>
+                        <button type="button" class="followers-modal-close" data-close-followers-modal aria-label="Fechar lista">×</button>
+                    </div>
+                    <div id="followers-modal-list" class="followers-modal-list"></div>
+                </div>
+            </div>
+
+            <div class="profile-field profile-posts-title">
+                <span>Seus posts</span>
+            </div>
+
+            <div id="profile-posts" class="profile-posts">
+                <div class="profile-empty">Você ainda não publicou nenhum animal.</div>
+            </div>
+        </section>
+    </main>
+
+    <div id="profile-avatar-crop-modal" class="pet-image-crop-modal" aria-hidden="true">
+        <section class="pet-image-crop-card profile-avatar-crop-card" role="dialog" aria-modal="true" aria-labelledby="profile-avatar-crop-title">
+            <div class="pet-image-crop-header">
+                <div>
+                    <p class="filter-modal-eyebrow">Foto de perfil</p>
+                    <h2 id="profile-avatar-crop-title" class="filter-modal-title">Ajustar enquadramento</h2>
+                </div>
+            </div>
+            <p class="pet-image-crop-copy">Arraste a foto, ajuste o zoom e gire se precisar.</p>
+            <div id="profile-avatar-crop-viewport" class="pet-image-crop-viewport profile-avatar-crop-viewport">
+                <img id="profile-avatar-crop-preview" alt="Prévia do recorte da foto de perfil">
+            </div>
+            <div class="pet-image-crop-controls">
+                <label class="pet-image-crop-zoom-label" for="profile-avatar-crop-zoom">
+                    Zoom
+                    <output id="profile-avatar-crop-zoom-value" for="profile-avatar-crop-zoom">1,0×</output>
+                </label>
+                <button type="button" id="profile-avatar-crop-rotate" class="btn-filter-secondary" aria-label="Girar imagem 90 graus" title="Girar imagem 90 graus">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M4 14v-3a7 7 0 0 1 7-7h5"/>
+                        <path d="m12 1 4 3-4 3"/>
+                        <path d="M9 10h11v11H9z"/>
+                    </svg>
+                </button>
+            </div>
+            <input id="profile-avatar-crop-zoom" class="pet-image-crop-zoom" type="range" min="1" max="3" step="0.1" value="1">
+            <div class="pet-image-crop-actions">
+                <button type="button" id="profile-avatar-crop-cancel" class="btn-filter-secondary">Cancelar</button>
+                <button type="button" id="profile-avatar-crop-apply" class="btn-submit">Usar foto</button>
+            </div>
+        </section>
+    </div>
+
+    <div id="pet-modal" class="pet-modal" aria-hidden="true">
+        <div class="pet-modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-name">
+            <div class="modal-image-wrapper">
+                <img id="modal-image" class="modal-image" src="../assets/images/placeholder.svg" alt="Foto do animal">
+                <div class="modal-header-row">
+                    <span id="modal-status" class="pet-status status-urgente detail-status">urgente</span>
+                    <button class="modal-close" id="modal-close" type="button" aria-label="Fechar">×</button>
+                </div>
+            </div>
+            <div class="modal-content">
+                <a class="pet-author pet-author-link" data-modal-author-link href="#" aria-label="Ver perfil do usuário">
+                    <img class="pet-author-avatar" data-modal-author-avatar src="../assets/images/usuario.png" alt="Foto do usuário" loading="lazy">
+                    <span class="pet-author-name" data-modal-author-name>Usuário</span>
+                </a>
+                <div class="modal-heading-row">
+                    <h2 id="modal-name" class="pet-name">Nome do animal</h2>
+                    <div class="modal-action-row">
+                        <div class="modal-like-wrap">
+                            <button type="button" class="modal-like-btn" id="modal-like-btn" aria-label="Curtir post" aria-pressed="false" title="Curtir post">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M12 21.35 10.55 20C5.4 15.36 2 12.28 2 8.5A4.5 4.5 0 0 1 6.5 4c1.74 0 3.41.81 4.5 2.09A6.12 6.12 0 0 1 15.5 4 4.5 4.5 0 0 1 20 8.5c0 3.78-3.4 6.86-8.55 11.5L12 21.35Z"/>
+                                </svg>
+                            </button>
+                            <span class="modal-like-count" id="modal-like-count">0</span>
+                        </div>
+                        <button type="button" class="modal-share-btn" id="modal-share-btn" aria-label="Compartilhar post" title="Compartilhar">
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M18 16a2.5 2.5 0 0 0-1.9 1l-7.4-4.2a3.1 3.1 0 0 0 0-1.6L16.1 7a2.5 2.5 0 1 0-.9-1.8L7.8 9.4a3 3 0 1 0 0 5.2l7.4 4.2A2.5 2.5 0 1 0 18 16Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <p id="modal-city" class="pet-city">Cidade</p>
+                <p id="modal-category" class="pet-category">Categoria</p>
+                <h3 class="detail-desc-title">História</h3>
+                <p id="modal-desc" class="detail-desc">Descrição do animal.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <p class="footer-credit"><strong>Desenvolvido por Lucas Vinicyus Sanches Anacleto.</strong></p>
+    </footer>
+    <script type="module" src="../js/firebase-config.js"></script>
+    <script type="module" src="../js/auth.js"></script>
+    <div id="add-pet-modal" class="add-pet-modal" aria-hidden="true">
+        <div class="add-pet-card">
+            <div class="add-pet-header">
+                <h2>Publicar animal</h2>
+            </div>
+            <form id="add-pet-form" class="add-pet-form">
+                <label class="form-field">
+                    <span>Fotos do animal</span>
+                    <input id="addpet-image" type="file" accept="image/*">
+                </label>
+                <div id="addpet-image-preview" class="pet-image-upload-preview" hidden>
+                    <img id="addpet-image-preview-img" alt="Prévia da foto recortada do animal">
+                    <span>Prévia da foto</span>
+                </div>
+                <label class="form-field">
+                    <span>Nome</span>
+                    <input id="addpet-name" type="text" placeholder="Nome do animal" required>
+                </label>
+                <div class="unknown-info-option">
+                    <input id="addpet-name-unknown" type="checkbox">
+                    <label for="addpet-name-unknown">Não sei informar.</label>
+                </div>
+                <label class="form-field">
+                    <span>Data de nascimento</span>
+                    <input id="addpet-birthdate" type="date" max="9999-12-31" placeholder="Data de nascimento" required>
+                    <span id="addpet-birthdate-error" class="input-error" role="alert" hidden>A data de nascimento não pode ser posterior à data atual.</span>
+                </label>
+                <div class="unknown-info-option">
+                    <input id="addpet-birthdate-unknown" type="checkbox">
+                    <label for="addpet-birthdate-unknown">Não sei informar.</label>
+                </div>
+                <label class="form-field">
+                    <span>Estado</span>
+                    <select id="addpet-state" required>
+                        <option value="">Selecione um estado</option>
+                        <option value="AC">AC - Acre</option>
+                        <option value="AL">AL - Alagoas</option>
+                        <option value="AP">AP - Amapá</option>
+                        <option value="AM">AM - Amazonas</option>
+                        <option value="BA">BA - Bahia</option>
+                        <option value="CE">CE - Ceará</option>
+                        <option value="DF">DF - Distrito Federal</option>
+                        <option value="ES">ES - Espírito Santo</option>
+                        <option value="GO">GO - Goiás</option>
+                        <option value="MA">MA - Maranhão</option>
+                        <option value="MT">MT - Mato Grosso</option>
+                        <option value="MS">MS - Mato Grosso do Sul</option>
+                        <option value="MG">MG - Minas Gerais</option>
+                        <option value="PA">PA - Pará</option>
+                        <option value="PB">PB - Paraíba</option>
+                        <option value="PR">PR - Paraná</option>
+                        <option value="PE">PE - Pernambuco</option>
+                        <option value="PI">PI - Piauí</option>
+                        <option value="RJ">RJ - Rio de Janeiro</option>
+                        <option value="RN">RN - Rio Grande do Norte</option>
+                        <option value="RS">RS - Rio Grande do Sul</option>
+                        <option value="RO">RO - Rondônia</option>
+                        <option value="RR">RR - Roraima</option>
+                        <option value="SC">SC - Santa Catarina</option>
+                        <option value="SP">SP - São Paulo</option>
+                        <option value="SE">SE - Sergipe</option>
+                        <option value="TO">TO - Tocantins</option>
+                    </select>
+                </label>
+                <label class="form-field">
+                    <span>Cidade</span>
+                    <select id="addpet-city" required>
+                        <option value="">Selecione o estado primeiro</option>
+                    </select>
+                </label>
+                <label class="form-field">
+                    <span>Status</span>
+                    <select id="addpet-status" required>
+                        <option value="urgente">urgente</option>
+                        <option value="resgate">resgate</option>
+                        <option value="adotado">adotado</option>
+                    </select>
+                </label>
+                <label class="form-field">
+                    <span>Categoria</span>
+                    <div class="category-picker" id="category-picker">
+                        <div class="category-selected-list" id="category-selected-list" aria-live="polite">
+                            <span class="category-empty">Nenhuma categoria selecionada</span>
+                        </div>
+                        <div class="category-options-list" id="category-options-list"></div>
+                    </div>
+                    <select id="addpet-category" name="categorias" multiple hidden aria-hidden="true"></select>
+                </label>
+                <label class="form-field">
+                    <span>Contato</span>
+                    <input id="addpet-contact" type="tel" inputmode="tel" placeholder="(00) 00000-0000" required>
+                </label>
+                <label class="form-field">
+                    <span>Descrição do animal</span>
+                    <textarea id="addpet-desc" rows="4" placeholder="Conte a história do animal" required></textarea>
+                </label>
+                <button type="submit" class="btn-submit btn-submit-full">Publicar animal</button>
+                <button type="button" id="add-pet-cancel" class="btn-filter-secondary">Cancelar</button>
+            </form>
+        </div>
+    </div>
+    <div id="pet-image-crop-modal" class="pet-image-crop-modal" aria-hidden="true">
+        <section class="pet-image-crop-card" role="dialog" aria-modal="true" aria-labelledby="pet-image-crop-title">
+            <div class="pet-image-crop-header">
+                <div>
+                    <p class="filter-modal-eyebrow">Foto do animal</p>
+                    <h2 id="pet-image-crop-title" class="filter-modal-title">Ajustar enquadramento</h2>
+                </div>
+            </div>
+            <p class="pet-image-crop-copy">Arraste a foto para ajustar o enquadramento e use o zoom se precisar.</p>
+            <div id="pet-image-crop-viewport" class="pet-image-crop-viewport">
+                <img id="pet-image-crop-preview" alt="Prévia do recorte da foto do animal">
+            </div>
+            <div class="pet-image-crop-controls">
+                <label class="pet-image-crop-zoom-label" for="pet-image-crop-zoom">
+                    Zoom
+                    <output id="pet-image-crop-zoom-value" for="pet-image-crop-zoom">1,0×</output>
+                </label>
+                <button type="button" id="pet-image-crop-rotate" class="btn-filter-secondary" aria-label="Girar imagem 90 graus" title="Girar imagem 90 graus">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M4 14v-3a7 7 0 0 1 7-7h5"/>
+                        <path d="m12 1 4 3-4 3"/>
+                        <path d="M9 10h11v11H9z"/>
+                    </svg>
+                </button>
+            </div>
+            <input id="pet-image-crop-zoom" class="pet-image-crop-zoom" type="range" min="1" max="3" step="0.1" value="1">
+            <div class="pet-image-crop-actions">
+                <button type="button" id="pet-image-crop-cancel" class="btn-filter-secondary">Cancelar</button>
+                <button type="button" id="pet-image-crop-apply" class="btn-submit">Usar foto</button>
+            </div>
+        </section>
+    </div>
+    <script type="module" src="../js/app.js"></script>
+    <script type="module" src="../js/profile.js"></script>
+</body>
+</html>

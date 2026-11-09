@@ -1,0 +1,21 @@
+{
+  "name": "ajudapet-functions",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "lint": "node --check index.js && node --check lib/pet-retention.js && node --check lib/notification-cleanup.js && node --check scripts/cleanup-read-notifications.mjs",
+    "cleanup": "node scripts/cleanup-adopted-pets.mjs",
+    "cleanup:read-notifications": "node scripts/cleanup-read-notifications.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0",
+    "firebase-functions": "^6.1.2"
+  },
+  "allowScripts": {
+    "protobufjs@7.6.6": true
+  }
+}

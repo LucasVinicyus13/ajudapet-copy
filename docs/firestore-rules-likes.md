@@ -1,0 +1,202 @@
+# Regras do Firestore para curtidas
+
+Cole este conteúdo no Firebase Console > Firestore Database > Regras para garantir que cada usuário só possa curtir um post uma vez e que a contagem só possa variar de 1 em 1.
+
+## Regra adicional para feedbacks
+
+Adicione este bloco dentro de `match /databases/{database}/documents`, junto às demais regras. Ele permite que usuários autenticados criem feedbacks apenas para o próprio `uid`, com os quatro campos usados pela aplicação, sem permitir leitura, alteração ou exclusão:
+
+```javascript
+match /feedbacks/{feedbackId} {
+  allow create: if request.auth != null
+    && request.resource.data.keys().hasOnly(['displayName', 'email', 'message', 'uid'])
+    && request.resource.data.keys().hasAll(['displayName', 'email', 'message', 'uid'])
+    && request.resource.data.uid == request.auth.uid
+    && request.resource.data.displayName is string
+    && request.resource.data.email is string
+    && request.resource.data.message is string
+    && request.resource.data.message.size() > 0;
+  allow read, update, delete: if false;
+}
+
+match /feedbackShares/{feedbackId} {
+  allow get: if true;
+  allow list, update, delete: if false;
+  allow create: if request.auth != null
+    && request.resource.data.keys().hasOnly(['displayName', 'message', 'uid'])
+    && request.resource.data.keys().hasAll(['displayName', 'message', 'uid'])
+    && request.resource.data.uid == request.auth.uid
+    && request.resource.data.displayName is string
+    && request.resource.data.message is string
+    && request.resource.data.message.size() > 0;
+}
+```
+
+`feedbackShares` contém somente os dados preparados para divulgação. A leitura pública é limitada à consulta de um documento por ID; listagem, alterações e exclusões são bloqueadas. Publique as regras no Firebase Console para que a alteração entre em vigor. As permissões de regras correspondentes no Firestore são aditivas: verifique também se não existe outra regra ampla que conceda leitura ou escrita.
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'admin@ajudapet.com' ||
+        request.auth.token.email == 'lucas@ajudapet.com'
+      );
+    }
+
+    function canEditPet() {
+      return isSignedIn() && (
+        request.auth.uid == resource.data.ownerUid ||
+        isAdmin()
+      );
+    }
+
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if isOwner(userId);
+      allow delete: if false;
+
+      match /notifications/{notificationId} {
+        allow read: if isOwner(userId);
+        allow create: if isSignedIn()
+          && request.resource.data.actorUid == request.auth.uid
+          && request.resource.data.targetUid == userId
+          && request.resource.data.type in ['like', 'follow']
+          && request.resource.data.viewed == false
+          && request.resource.data.createdAt is timestamp;
+        allow update: if isOwner(userId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewed', 'viewedAt']);
+        allow delete: if isOwner(userId);
+      }
+
+      match /notifications/{notificationId} {
+        allow read: if isOwner(userId);
+        allow create: if isSignedIn()
+          && request.resource.data.actorUid == request.auth.uid
+          && request.resource.data.targetUid == userId
+          && request.resource.data.type in ['like', 'follow']
+          && request.resource.data.viewed == false
+          && request.resource.data.createdAt is timestamp;
+        allow update: if isOwner(userId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewed', 'viewedAt']);
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    match /reports/{reportId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && request.auth.token.email != null;
+    }
+
+    match /pets/{petId} {
+      allow read: if true;
+
+      allow create: if isSignedIn()
+        && request.resource.data.ownerUid == request.auth.uid;
+
+      allow update: if (
+        canEditPet()
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['likesCount'])
+      ) || (
+        isSignedIn() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount']) &&
+        (
+          (!('likesCount' in resource.data) && request.resource.data.likesCount == 1) ||
+          request.resource.data.likesCount == resource.data.likesCount + 1 ||
+          request.resource.data.likesCount == resource.data.likesCount - 1
+        )
+      );
+
+      allow delete: if canEditPet();
+
+      match /likes/{userId} {
+        allow read: if true;
+        allow create: if isOwner(userId)
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.keys().hasOnly(['userId', 'createdAt'])
+          && !exists(/databases/$(database)/documents/pets/$(petId)/likes/$(userId));
+        allow delete: if isOwner(userId)
+          && exists(/databases/$(database)/documents/pets/$(petId)/likes/$(userId));
+      }
+    }
+  }
+}
+```
+
+Observações:
+- O problema do erro de edição é que a regra antiga só permitia alteração de `likesCount`; a edição completa do pet ficava bloqueada.
+- A regra acima permite edição do animal pelo dono do post e por administradores, sem abrir o documento inteiro para qualquer usuário.
+- O campo `likesCount` continua protegido para aumentar/decrementar apenas 1 por vez.
+- A unicidade real fica garantida pela subcoleção `pets/{petId}/likes/{userId}`.
+
+## Regras do Firestore para seguidores e seguindo
+
+Se a app deve salvar apenas no Firestore e não em localStorage, use uma regra que permita:
+- o usuário ler qualquer perfil;
+- o usuário alterar apenas o array `following` do próprio documento;
+- o usuário alterar apenas o array `followers` do documento do alvo quando estiver seguindo ou deixando de seguir.
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidUserFollowList(data) {
+      return data is list;
+    }
+
+    match /users/{userId} {
+      allow read: if true;
+
+      allow update: if isSignedIn() && (
+        userId == request.auth.uid || (
+          userId != request.auth.uid &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['followers', 'followersUpdatedAt']) &&
+          isValidUserFollowList(request.resource.data.followers) &&
+          (
+            (
+              request.resource.data.followers.size() == resource.data.get('followers', []).size() + 1 &&
+              request.auth.uid in request.resource.data.followers &&
+              request.auth.uid in get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('following', []) &&
+              request.resource.data.followers.hasAll(resource.data.get('followers', []))
+            ) || (
+              request.resource.data.followers.size() == resource.data.get('followers', []).size() - 1 &&
+              request.auth.uid in resource.data.get('followers', []) &&
+              !(request.auth.uid in request.resource.data.followers) &&
+              resource.data.get('followers', []).hasAll(request.resource.data.followers)
+            )
+          )
+        )
+      );
+
+      allow create: if isOwner(userId);
+      allow delete: if false;
+    }
+  }
+}
+```
+
+Importante:
+- As regras de perfil permitem leitura pública dos documentos `users/{userId}` para exibir nome, avatar e contadores. Não guarde nesses documentos dados privados; Firestore não oferece regras de leitura por campo.
+- O estado de seguidores/seguindo deve ser calculado a partir do Firestore e exibido em tempo real nos textos e contadores.
+- Não use `localStorage` como fonte de verdade para `followers` e `following`.
+- Ao seguir alguém, grave primeiro o campo `following` no documento do usuário conectado e só depois atualize `followers` no perfil-alvo. Não agrupe essas gravações em um batch: a regra do perfil-alvo consulta o `following` já persistido com `get()`.
+- A atualização ocorre ao clicar no botão de seguir/deixar de seguir, e o valor é refletido para todos os usuários que consultam o perfil.

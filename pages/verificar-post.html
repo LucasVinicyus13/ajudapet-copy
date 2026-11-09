@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../assets/images/favicon.png">
+    <title>Verificar post - AjudaPet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-light">
+    <header class="app-header">
+        <div class="container">
+            <a href="https://ajudapet-blush.vercel.app" id="app-logo" aria-label="Ir para a página inicial do AjudaPet" title="Ir para a página inicial do AjudaPet"><img src="../assets/images/favicon.png" alt="" aria-hidden="true">Ajuda<span>Pet</span></a>
+            <a href="../index.html" class="home-button" aria-label="Ir para a página inicial" title="Ir para a página inicial">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3 2.5 11h2.75v9h5.25v-5.5h3V20h5.25v-9h2.75L12 3Z"/></svg>
+            </a>
+        </div>
+    </header>
+
+    <main class="container profile-page">
+        <section class="profile-card" id="verification-card">
+            <div class="profile-empty">Carregando post...</div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { auth, observeAuthState, buscarPetPorId, atualizarPet, deletarPet } from '../js/firebase-config.js';
+        import { isAdminEmail } from '../js/pet-utils.js';
+
+        const params = new URLSearchParams(window.location.search);
+        const petId = params.get('id');
+        const container = document.getElementById('verification-card');
+
+        function redirectHome() {
+            window.location.href = 'https://ajudapet-blush.vercel.app';
+        }
+
+        observeAuthState((user) => {
+            if (!user) {
+                redirectHome();
+                return;
+            }
+
+            if (!isAdminEmail(user.email)) {
+                redirectHome();
+                return;
+            }
+
+            if (!petId) {
+                container.innerHTML = '<div class="profile-empty">Post não encontrado.</div>';
+                return;
+            }
+
+            loadPet(petId);
+        });
+
+        async function loadPet(id) {
+            try {
+                const pet = await buscarPetPorId(id);
+                if (!pet) {
+                    container.innerHTML = '<div class="profile-empty">Post não encontrado.</div>';
+                    return;
+                }
+
+                container.innerHTML = `
+                    <img src="${pet.imagem || '../assets/images/placeholder.svg'}" alt="${pet.nome}" class="verification-pet-image">
+                    <h2>${pet.nome}</h2>
+                    <p><strong>Cidade:</strong> ${pet.cidade || '-'}</p>
+                    <p><strong>Status:</strong> ${pet.status || '-'}</p>
+                    <p><strong>Contato:</strong> ${pet.contato || pet.telefone || '-'}</p>
+                    <p><strong>Descrição:</strong> ${pet.descricao || '-'}</p>
+                    <p><strong>Categoria:</strong> ${(pet.categoria || []).join(', ') || '-'}</p>
+                    <div class="profile-action" style="margin-top: 1.5rem;">
+                        <button type="button" id="allow-post" class="btn-submit btn-avatar-primary">Permitir</button>
+                        <button type="button" id="delete-post" class="btn-submit btn-avatar-secondary">Excluir post</button>
+                    </div>
+                `;
+
+                document.getElementById('allow-post').addEventListener('click', async () => {
+                    await atualizarPet(id, { status: pet.status || 'resgate', aprovado: true });
+                    alert('Post permitido.');
+                    window.location.href = '../index.html';
+                });
+
+                document.getElementById('delete-post').addEventListener('click', async () => {
+                    if (!confirm('Deseja excluir este post?')) return;
+                    await deletarPet(id);
+                    alert('Post excluído.');
+                    window.location.href = '../index.html';
+                });
+            } catch (error) {
+                console.error('Erro ao carregar post:', error);
+                container.innerHTML = '<div class="profile-empty">Não foi possível carregar este post.</div>';
+            }
+        }
+    </script>
+    <footer class="app-footer">
+        <p class="footer-credit"><strong>Desenvolvido por Lucas Vinicyus Sanches Anacleto.</strong></p>
+    </footer>
+</body>
+</html>

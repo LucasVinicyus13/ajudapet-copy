@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../assets/images/favicon.png">
+    <title>Detalhes do Pet - AjudaPet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        body {
+            background: #f6f7fb;
+        }
+
+        .detail-page {
+            width: min(100%, 540px);
+            min-height: 100vh;
+            margin: 0 auto;
+            background: var(--bg-light);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .detail-header {
+            position: relative;
+            aspect-ratio: var(--pet-image-aspect-ratio);
+        }
+
+        .detail-image {
+            width: 100%;
+            height: 100%;
+            aspect-ratio: var(--pet-image-aspect-ratio);
+            object-fit: cover;
+            display: block;
+        }
+
+        .btn-back {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--secondary);
+            font-size: 1.6rem;
+            box-shadow: var(--shadow);
+            z-index: 10;
+        }
+
+        .detail-header .home-button {
+            position: absolute;
+            top: 24px;
+            right: 20px;
+            z-index: 10;
+        }
+
+        .detail-content {
+            background: var(--bg-light);
+            margin-top: -30px;
+            border-radius: 30px 30px 0 0;
+            padding: 2rem 1.5rem 8rem;
+            position: relative;
+            min-height: 50vh;
+        }
+
+        .detail-info {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-status {
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .detail-name {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-city {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .detail-meta-item {
+            background: rgba(255, 122, 77, 0.08);
+            color: var(--secondary);
+            border-radius: 999px;
+            padding: 0.55rem 0.9rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .detail-desc-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+        }
+
+        .detail-desc {
+            color: var(--text-dark);
+            line-height: 1.8;
+        }
+
+        .detail-actions {
+            display: grid;
+            gap: 0.9rem;
+            margin-top: 1.5rem;
+        }
+
+        .footer-action {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(100%, 540px);
+            background: var(--white);
+            padding: 1rem 1.5rem 1.2rem;
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="detail-page">
+        <header class="detail-header">
+            <a href="../index.html" class="btn-back" aria-label="Voltar">←</a>
+            <a href="../index.html" class="home-button" aria-label="Ir para a página inicial" title="Ir para a página inicial">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3 2.5 11h2.75v9h5.25v-5.5h3V20h5.25v-9h2.75L12 3Z"/></svg>
+            </a>
+            <img src="../assets/images/placeholder.svg" alt="Pet" class="detail-image" id="pet-image">
+        </header>
+
+        <main class="detail-content">
+            <div class="container">
+                <div class="detail-info">
+                    <span class="pet-status status-urgente detail-status" id="pet-status">urgente</span>
+                    <h1 class="pet-name detail-name" id="pet-name">Carregando...</h1>
+                    <p class="detail-city" id="pet-city">Carregando localização...</p>
+
+                    <div class="detail-meta">
+                        <span class="detail-meta-item" id="pet-age">Idade</span>
+                        <span class="detail-meta-item" id="pet-category">Categoria</span>
+                    </div>
+
+                    <h3 class="detail-desc-title">História</h3>
+                    <p class="detail-desc" id="pet-desc">Carregando descrição...</p>
+
+                    <div class="detail-actions">
+                        <button class="btn-ajudar" id="btn-ajudar-detail" type="button">AJUDAR</button>
+                        <button class="btn-report" id="btn-denunciar-detail" type="button">Denunciar</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div class="footer-action">
+            <div class="container">
+                <button class="btn-ajudar" id="btn-ajudar-footer" type="button">AJUDAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="detail-report-modal" class="report-modal" aria-hidden="true">
+        <div class="report-modal-card">
+            <div class="report-modal-header">
+                <div>
+                    <p class="filter-modal-eyebrow">Denúncia</p>
+                    <h2 class="filter-modal-title">Denunciar post</h2>
+                </div>
+                <button type="button" class="filter-close" id="detail-report-close-button" aria-label="Fechar denúncia">×</button>
+            </div>
+            <p class="report-copy">Você está denunciando o post de <strong id="detail-report-pet-name">este animal</strong>.</p>
+            <form id="detail-report-form" class="report-form">
+                <label class="report-option"><input type="radio" name="detail-report-reason" value="Pornografia"> Pornografia</label>
+                <label class="report-option"><input type="radio" name="detail-report-reason" value="Palavrões"> Palavrões</label>
+                <label class="report-option"><input type="radio" name="detail-report-reason" value="Não é um animal"> Não é um animal</label>
+                <label class="report-option"><input type="radio" name="detail-report-reason" value="Outro"> Outro</label>
+                <label class="report-field report-field-hidden">
+                    <span>Descreva o motivo</span>
+                    <textarea id="detail-report-other-reason" maxlength="150" rows="3" placeholder="Máximo de 150 caracteres"></textarea>
+                </label>
+                <div class="filter-actions">
+                    <button type="button" class="btn-filter-secondary" id="detail-report-cancel-button">Cancelar</button>
+                    <button type="submit" class="btn-filter-primary">Enviar denúncia</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="module">
+        import { auth, buscarPetPorId, criarDenuncia, observeAuthState } from '../js/firebase-config.js';
+        import { buildReportEmailContent, formatPetAge, formatCityWithState, formatCategories, getPetDetailUrl, matchesUserPost } from '../js/pet-utils.js';
+
+        const EMAILJS_CONFIG = {
+            serviceId: 'service_gy5u2oa',
+            templateId: 'template_mfg3oh5',
+            publicKey: '9QiT5PgUyYcIT_J7V'
+        };
+
+        const params = new URLSearchParams(window.location.search);
+        const petId = params.get('id') || (window.location.hash ? window.location.hash.replace(/^#/, '') : '');
+        const petImage = document.getElementById('pet-image');
+
+        function normalizePetId(value) {
+            return String(value || '').trim();
+        }
+
+        function findPetByIdFromLocalState(targetId) {
+            if (!targetId) return null;
+
+            try {
+                const raw = sessionStorage.getItem('ajudapet_local_pets');
+                if (!raw) return null;
+
+                const localPets = JSON.parse(raw) || {};
+                const match = Object.keys(localPets).find((key) => String(key) === String(targetId));
+                if (match) {
+                    return { id: match, ...localPets[match] };
+                }
+
+                const values = Object.values(localPets);
+                return values.find((pet) => normalizePetId(pet?.id) === normalizePetId(targetId)
+                    || normalizePetId(pet?.petId) === normalizePetId(targetId)
+                    || normalizePetId(pet?.docId) === normalizePetId(targetId));
+            } catch (error) {
+                console.warn('Não foi possível buscar o post no cache local:', error);
+                return null;
+            }
+        }
+        const petStatus = document.getElementById('pet-status');
+        const petName = document.getElementById('pet-name');
+        const petCity = document.getElementById('pet-city');
+        const petAge = document.getElementById('pet-age');
+        const petCategory = document.getElementById('pet-category');
+        const petDesc = document.getElementById('pet-desc');
+
+        function updateStatusClasses(status) {
+            petStatus.className = `pet-status status-${status || 'urgente'} detail-status`;
+        }
+
+        function requireLoginForAction() {
+            if (auth.currentUser) return true;
+
+            alert('Você precisa fazer login antes de ajudar ou denunciar um animal.');
+            const returnUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+            window.location.href = `login.html?returnUrl=${encodeURIComponent(returnUrl)}`;
+            return false;
+        }
+
+        function openWhatsApp(pet) {
+            if (!requireLoginForAction()) return;
+
+            const telefone = pet?.telefone || pet?.contato || '';
+            const numero = telefone.replace(/\D/g, '').slice(0, 11);
+
+            if (!numero) {
+                alert('Este post não possui um contato válido para WhatsApp.');
+                return;
+            }
+
+            const mensagem = encodeURIComponent(`Olá! Vi o ${pet?.nome || 'este animal'} no AjudaPet e gostaria de saber como posso ajudar.`);
+            window.open(`https://wa.me/${numero}?text=${mensagem}`, '_blank');
+        }
+
+        function isEmailJsConfigured() {
+            return typeof window.emailjs !== 'undefined'
+                && EMAILJS_CONFIG.serviceId
+                && EMAILJS_CONFIG.templateId
+                && EMAILJS_CONFIG.publicKey
+                && EMAILJS_CONFIG.templateId !== 'template_xxxxx'
+                && EMAILJS_CONFIG.publicKey !== 'YOUR_PUBLIC_KEY';
+        }
+
+        async function sendDetailReportEmail(reportPayload, petOwner, motivo) {
+            const { subject, message } = buildReportEmailContent(petOwner, motivo, reportPayload.petId, window.location.origin || 'https://ajudapet-blush.vercel.app');
+
+            if (!isEmailJsConfigured()) {
+                throw new Error('EmailJS não está configurado.');
+            }
+
+            if (typeof window.emailjs?.init === 'function') {
+                window.emailjs.init({ publicKey: EMAILJS_CONFIG.publicKey });
+            }
+
+            return window.emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, {
+                subject,
+                message,
+                petOwner,
+                motivo,
+                petName: reportPayload.petName || '',
+                reporterName: reportPayload.reporterName || '',
+                reporterEmail: reportPayload.reporterEmail || '',
+                petUrl: `${window.location.origin}/pages/verificar-post.html?id=${reportPayload.petId}`
+            });
+        }
+
+        async function submitDetailReport(event, pet) {
+            event.preventDefault();
+
+            if (!pet) return;
+
+            if (!auth.currentUser) {
+                requireLoginForAction();
+                return;
+            }
+
+            const selectedReasonInput = document.querySelector('input[name="detail-report-reason"]:checked');
+            const selectedReason = selectedReasonInput ? selectedReasonInput.value : '';
+            const customReason = document.getElementById('detail-report-other-reason') ? document.getElementById('detail-report-other-reason').value.trim() : '';
+            const motivo = selectedReason === 'Outro' ? customReason : selectedReason;
+
+            if (!motivo) {
+                alert('Selecione um motivo e descreva o detalhe, quando necessário.');
+                return;
+            }
+
+            const reporterName = auth.currentUser.displayName || auth.currentUser.email || 'Usuário sem nome';
+            const reporterEmail = auth.currentUser.email || '';
+            const petOwner = pet.ownerEmail || pet.ownerUid || 'usuário';
+            const reportPayload = {
+                petId: pet.id,
+                petName: pet.nome,
+                reporterName,
+                reporterEmail,
+                motivo,
+                ownerIdentifier: petOwner
+            };
+
+            try {
+                await criarDenuncia(reportPayload);
+
+                try {
+                    await sendDetailReportEmail(reportPayload, petOwner, motivo);
+                    document.getElementById('detail-report-modal').classList.remove('visible');
+                    document.getElementById('detail-report-modal').setAttribute('aria-hidden', 'true');
+                    alert('Denúncia registrada com sucesso! A notificação foi enviada automaticamente.');
+                } catch (emailError) {
+                    console.warn('EmailJS falhou para denúncia da página de detalhes:', emailError);
+                    document.getElementById('detail-report-modal').classList.remove('visible');
+                    document.getElementById('detail-report-modal').setAttribute('aria-hidden', 'true');
+                    alert('Denúncia registrada com sucesso, mas não foi possível confirmar o envio da notificação por e-mail.');
+                }
+            } catch (error) {
+                console.error('Erro ao registrar denúncia na página de detalhes:', error);
+                alert('Não foi possível registrar a denúncia. Tente novamente.');
+            }
+        }
+
+        function openDetailReportModal(pet) {
+            const modal = document.getElementById('detail-report-modal');
+            if (!modal || !pet) return;
+
+            const petName = document.getElementById('detail-report-pet-name');
+            const otherReason = document.getElementById('detail-report-other-reason');
+            const reasonInputs = document.querySelectorAll('input[name="detail-report-reason"]');
+
+            if (petName) petName.textContent = pet.nome || 'este animal';
+            if (otherReason) {
+                otherReason.value = '';
+                otherReason.parentElement.classList.remove('visible');
+            }
+
+            reasonInputs.forEach((input) => {
+                input.checked = false;
+                input.onchange = () => {
+                    if (otherReason) {
+                        otherReason.parentElement.classList.toggle('visible', input.value === 'Outro');
+                    }
+                };
+            });
+
+            modal.classList.add('visible');
+            modal.setAttribute('aria-hidden', 'false');
+            modal.dataset.petId = pet.id;
+        }
+
+        function closeDetailReportModal() {
+            const modal = document.getElementById('detail-report-modal');
+            if (!modal) return;
+            modal.classList.remove('visible');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        async function loadPet() {
+            if (!petId) {
+                petName.textContent = 'Post não encontrado';
+                petCity.textContent = 'Verifique o link compartilhado.';
+                petDesc.textContent = 'Não foi possível localizar esse animal.';
+                return;
+            }
+
+            try {
+                let pet = await buscarPetPorId(petId);
+                if (!pet) {
+                    pet = findPetByIdFromLocalState(petId);
+                }
+
+                if (!pet) {
+                    petName.textContent = 'Post não encontrado';
+                    petCity.textContent = 'Verifique o link compartilhado.';
+                    petDesc.textContent = 'Não foi possível localizar esse animal.';
+                    return;
+                }
+
+                const imageUrl = pet.imagem || '../assets/images/placeholder.svg';
+                petImage.src = imageUrl;
+                petImage.alt = pet.nome || 'Animal';
+                petImage.onerror = () => {
+                    petImage.src = '../assets/images/placeholder.svg';
+                };
+
+                petStatus.textContent = pet.status || 'urgente';
+                updateStatusClasses(pet.status || 'urgente');
+                petName.textContent = pet.nome || 'Animal';
+                petCity.textContent = formatCityWithState(pet) || 'Localização não informada';
+
+                petAge.textContent = formatPetAge(pet);
+                petCategory.textContent = formatCategories(pet) || 'Categoria não informada';
+                petDesc.textContent = pet.descricao || 'Sem descrição disponível.';
+
+                document.title = `${pet.nome || 'Detalhes do pet'} - AjudaPet`;
+
+                        const actionButtons = [
+                    document.getElementById('btn-ajudar-detail'),
+                    document.getElementById('btn-ajudar-footer'),
+                    document.getElementById('btn-denunciar-detail')
+                ];
+
+                actionButtons.forEach((button) => {
+                    if (!button) return;
+                    button.dataset.petId = pet.id;
+                });
+
+                const helpDetailButton = document.getElementById('btn-ajudar-detail');
+                const helpFooterButton = document.getElementById('btn-ajudar-footer');
+                const isPetAdopted = String(pet.status || '').trim().toLowerCase() === 'adotado';
+                const detailActions = document.querySelector('.detail-actions');
+                const footerAction = document.querySelector('.footer-action');
+
+                if (helpDetailButton) {
+                    helpDetailButton.hidden = isPetAdopted;
+                    helpDetailButton.disabled = isPetAdopted;
+                    if (!isPetAdopted) {
+                        helpDetailButton.addEventListener('click', () => openWhatsApp(pet));
+                    }
+                }
+
+                if (helpFooterButton) {
+                    helpFooterButton.hidden = isPetAdopted;
+                    helpFooterButton.disabled = isPetAdopted;
+                    if (!isPetAdopted) {
+                        helpFooterButton.addEventListener('click', () => openWhatsApp(pet));
+                    }
+                }
+
+                document.getElementById('btn-denunciar-detail').addEventListener('click', () => {
+                    if (requireLoginForAction()) openDetailReportModal(pet);
+                });
+
+                observeAuthState((user) => {
+                    const isOwnPost = matchesUserPost(pet, user?.uid, user?.email);
+                    if (detailActions) {
+                        detailActions.hidden = isOwnPost;
+                        detailActions.style.display = isOwnPost ? 'none' : '';
+                    }
+                    if (footerAction) {
+                        const shouldHideFooter = isOwnPost || isPetAdopted;
+                        footerAction.hidden = shouldHideFooter;
+                        footerAction.style.display = shouldHideFooter ? 'none' : '';
+                    }
+                });
+
+                const detailReportForm = document.getElementById('detail-report-form');
+                if (detailReportForm) {
+                    detailReportForm.addEventListener('submit', (event) => submitDetailReport(event, pet));
+                }
+
+                const detailReportCloseButton = document.getElementById('detail-report-close-button');
+                if (detailReportCloseButton) {
+                    detailReportCloseButton.addEventListener('click', closeDetailReportModal);
+                }
+
+                const detailReportCancelButton = document.getElementById('detail-report-cancel-button');
+                if (detailReportCancelButton) {
+                    detailReportCancelButton.addEventListener('click', closeDetailReportModal);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar pet em detalhes:', error);
+                petName.textContent = 'Erro ao carregar post';
+                petCity.textContent = 'Tente novamente mais tarde.';
+                petDesc.textContent = 'Não foi possível carregar os dados desse animal no momento.';
+            }
+        }
+
+        loadPet();
+    </script>
+    <footer class="app-footer">
+        <p class="footer-credit"><strong>Desenvolvido por Lucas Vinicyus Sanches Anacleto.</strong></p>
+    </footer>
+</body>
+
+</html>
