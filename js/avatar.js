@@ -83,51 +83,89 @@ export async function compressProfileImage(imageBlob) {
     }
 }
 
-export function setupProfileImagePreview(imageElement) {
-    if (!imageElement || document.getElementById('profile-image-preview')) return;
+let profileImagePreviewState = null;
 
-    const modal = document.createElement('div');
-    modal.id = 'profile-image-preview';
-    modal.className = 'profile-image-preview';
-    modal.hidden = true;
-    modal.setAttribute('aria-hidden', 'true');
+export function setupProfileImagePreview(imageElement, options = {}) {
+    if (!imageElement) return;
 
-    const dialog = document.createElement('div');
-    dialog.className = 'profile-image-preview-dialog';
-    dialog.setAttribute('role', 'dialog');
-    dialog.setAttribute('aria-modal', 'true');
-    dialog.setAttribute('aria-label', 'Foto de perfil ampliada');
-
-    const closeButton = document.createElement('button');
-    closeButton.type = 'button';
-    closeButton.className = 'profile-image-preview-close';
-    closeButton.setAttribute('aria-label', 'Fechar foto ampliada');
-    closeButton.textContent = '×';
-
-    const previewImage = document.createElement('img');
-    previewImage.className = 'profile-image-preview-image';
-
-    dialog.append(closeButton, previewImage);
-    modal.appendChild(dialog);
-    document.body.appendChild(modal);
-
-    const closePreview = () => {
+    if (!profileImagePreviewState) {
+        const modal = document.createElement('div');
+        modal.id = 'profile-image-preview';
+        modal.className = 'profile-image-preview';
         modal.hidden = true;
         modal.setAttribute('aria-hidden', 'true');
-        imageElement.focus();
-    };
+
+        const dialog = document.createElement('div');
+        dialog.className = 'profile-image-preview-dialog';
+        dialog.setAttribute('role', 'dialog');
+        dialog.setAttribute('aria-modal', 'true');
+
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'profile-image-preview-close';
+        closeButton.setAttribute('aria-label', 'Fechar imagem ampliada');
+        closeButton.textContent = '×';
+
+        const previewImage = document.createElement('img');
+        previewImage.className = 'profile-image-preview-image';
+
+        dialog.append(closeButton, previewImage);
+        modal.appendChild(dialog);
+        document.body.appendChild(modal);
+
+        profileImagePreviewState = {
+            modal,
+            dialog,
+            closeButton,
+            previewImage,
+            activeTrigger: null,
+            onClose: null
+        };
+
+        const closePreview = () => {
+            if (modal.hidden) return;
+            modal.hidden = true;
+            modal.setAttribute('aria-hidden', 'true');
+            const { activeTrigger, onClose } = profileImagePreviewState;
+            profileImagePreviewState.activeTrigger = null;
+            profileImagePreviewState.onClose = null;
+            activeTrigger?.focus();
+            onClose?.();
+        };
+
+        closeButton.addEventListener('click', closePreview);
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) closePreview();
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !modal.hidden) closePreview();
+        });
+    }
+
+    const state = profileImagePreviewState;
+    const {
+        onOpen,
+        onClose,
+        triggerLabel = 'Ampliar foto de perfil',
+        dialogLabel = 'Foto de perfil ampliada',
+        fallbackAlt = 'Foto de perfil'
+    } = options;
 
     const openPreview = () => {
-        previewImage.src = imageElement.currentSrc || imageElement.src;
-        previewImage.alt = imageElement.alt || 'Foto de perfil';
-        modal.hidden = false;
-        modal.setAttribute('aria-hidden', 'false');
-        closeButton.focus();
+        state.activeTrigger = imageElement;
+        state.onClose = onClose;
+        state.previewImage.src = imageElement.currentSrc || imageElement.src;
+        state.previewImage.alt = imageElement.alt || fallbackAlt;
+        state.dialog.setAttribute('aria-label', dialogLabel);
+        state.modal.hidden = false;
+        state.modal.setAttribute('aria-hidden', 'false');
+        onOpen?.();
+        state.closeButton.focus();
     };
 
     imageElement.setAttribute('role', 'button');
     imageElement.setAttribute('tabindex', '0');
-    imageElement.setAttribute('aria-label', 'Ampliar foto de perfil');
+    imageElement.setAttribute('aria-label', triggerLabel);
     imageElement.setAttribute('aria-haspopup', 'dialog');
     imageElement.classList.add('profile-image-preview-trigger');
     imageElement.addEventListener('click', openPreview);
@@ -136,14 +174,6 @@ export function setupProfileImagePreview(imageElement) {
             event.preventDefault();
             openPreview();
         }
-    });
-
-    closeButton.addEventListener('click', closePreview);
-    modal.addEventListener('click', (event) => {
-        if (event.target === modal) closePreview();
-    });
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && !modal.hidden) closePreview();
     });
 }
 

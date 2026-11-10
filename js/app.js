@@ -5,6 +5,7 @@
 
 import { listarPets, listarPetsPage, criarPet, criarDenuncia, criarFeedback, auth, atualizarPet, removeLocalPet, togglePetLike, subscribeToPetLikes, getPetLikeState, db, observeAuthState } from './firebase-config.js';
 import { compressImageDataUrl, getDataUrlSizeInBytes, formatPhoneInput, normalizePhone, formatDateTime, formatPetAge, formatCityWithState, getPetDetailUrl, buildPetShareText, sharePet, resolvePetId, getProfileTargetPagePath, matchesUserPost } from './pet-utils.js';
+import { setupProfileImagePreview } from './avatar.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const CATEGORIES = [
@@ -6068,6 +6069,107 @@ function applyFilterSelection() {
 }
 
 async function initApp() {
+    const homeBannerTrack = document.querySelector('.home-banner-track');
+    if (homeBannerTrack) {
+        const previousButton = document.querySelector('.home-banner-previous');
+        const nextButton = document.querySelector('.home-banner-next');
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let currentSlide = 1;
+        let isTransitioning = false;
+        let isPreviewOpen = false;
+        let autoSlideTimer = null;
+        let transitionFallback = null;
+        let pausedTrackAnimations = [];
+
+        const clearAutoSlide = () => {
+            window.clearTimeout(autoSlideTimer);
+            autoSlideTimer = null;
+        };
+
+        const scheduleAutoSlide = () => {
+            clearAutoSlide();
+            if (!isPreviewOpen && !prefersReducedMotion) {
+                autoSlideTimer = window.setTimeout(() => moveBanner(1), 6000);
+            }
+        };
+
+        const finishBannerMove = () => {
+            if (!isTransitioning) return;
+            window.clearTimeout(transitionFallback);
+            transitionFallback = null;
+
+            if (currentSlide === 0 || currentSlide === 4) {
+                homeBannerTrack.style.transition = 'none';
+                currentSlide = currentSlide === 0 ? 3 : 1;
+                homeBannerTrack.style.transform = `translateX(-${currentSlide * 20}%)`;
+                void homeBannerTrack.offsetWidth;
+                homeBannerTrack.style.transition = '';
+            }
+
+            isTransitioning = false;
+            scheduleAutoSlide();
+        };
+
+        const moveBanner = (direction) => {
+            if (isTransitioning) return false;
+            currentSlide += direction;
+            isTransitioning = true;
+            homeBannerTrack.style.transform = `translateX(-${currentSlide * 20}%)`;
+
+            if (prefersReducedMotion) {
+                finishBannerMove();
+            } else {
+                transitionFallback = window.setTimeout(finishBannerMove, 700);
+            }
+            return true;
+        };
+
+        const pauseBanner = () => {
+            isPreviewOpen = true;
+            clearAutoSlide();
+            window.clearTimeout(transitionFallback);
+            pausedTrackAnimations = homeBannerTrack.getAnimations().filter((animation) => animation.playState === 'running');
+            pausedTrackAnimations.forEach((animation) => animation.pause());
+        };
+
+        const resumeBanner = () => {
+            isPreviewOpen = false;
+            pausedTrackAnimations.forEach((animation) => animation.play());
+            pausedTrackAnimations = [];
+            if (isTransitioning && !prefersReducedMotion) {
+                transitionFallback = window.setTimeout(finishBannerMove, 700);
+            } else {
+                scheduleAutoSlide();
+            }
+        };
+
+        homeBannerTrack.addEventListener('transitionend', (event) => {
+            if (event.target === homeBannerTrack && event.propertyName === 'transform') {
+                finishBannerMove();
+            }
+        });
+        previousButton?.addEventListener('click', () => {
+            clearAutoSlide();
+            moveBanner(-1);
+        });
+        nextButton?.addEventListener('click', () => {
+            clearAutoSlide();
+            moveBanner(1);
+        });
+
+        document.querySelectorAll('.home-banner-slide:not([aria-hidden="true"])').forEach((image, index) => {
+            setupProfileImagePreview(image, {
+                onOpen: pauseBanner,
+                onClose: resumeBanner,
+                triggerLabel: `Ampliar imagem ${index + 1} do banner`,
+                dialogLabel: 'Imagem do banner ampliada',
+                fallbackAlt: 'Imagem do banner AjudaPet'
+            });
+        });
+
+        scheduleAutoSlide();
+    }
+
     petModal = document.getElementById('pet-modal');
     modalImage = document.getElementById('modal-image');
     modalStatus = document.getElementById('modal-status');
